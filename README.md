@@ -1,5 +1,5 @@
 ## openvpn-install
-OpenVPN Server installer for Debian, Ubuntu and CentOS. (Added support for Amazon Lightsail Ubuntu 16.04)
+Semi-automatic OpenVPN server installer for Debian, Ubuntu and CentOS. (Added support for Amazon lightsail Ubuntu 16.04)
 
 ### Installation
 Run the script below and follow the instructions:
