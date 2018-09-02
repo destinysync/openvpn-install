@@ -130,8 +130,8 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 					firewall-cmd --zone=trusted --remove-source=10.8.0.0/24
 					firewall-cmd --permanent --zone=public --remove-port=$PORT/$PROTOCOL
 					firewall-cmd --permanent --zone=trusted --remove-source=10.8.0.0/24
-					firewall-cmd --direct --remove-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $IP
-					firewall-cmd --permanent --direct --remove-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $IP
+					firewall-cmd --direct --remove-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
+					firewall-cmd --permanent --direct --remove-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
 				else
 					IP=$(grep 'iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to ' $RCLOCAL | cut -d " " -f 14)
 					iptables -t nat -D POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
@@ -318,7 +318,7 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
 		# Set NAT for the VPN subnet
 		firewall-cmd --direct --add-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
-		firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $IP
+		firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
 	else
 		# Needed to use rc.local with some systemd distros
 		if [[ "$OS" = 'debian' && ! -e $RCLOCAL ]]; then
@@ -327,8 +327,8 @@ exit 0' > $RCLOCAL
 		fi
 		chmod +x $RCLOCAL
 		# Set NAT for the VPN subnet
-		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $IP
-		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
+		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE
+		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j MASQUERADE" $RCLOCAL
 		if iptables -L -n | grep -qE '^(REJECT|DROP)'; then
 			# If iptables has at least one REJECT rule, we asume this is needed.
 			# Not the best approach but I can't think of other and this shouldn't
